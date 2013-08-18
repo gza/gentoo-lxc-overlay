@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE repositories SYSTEM "/dtd/repositories.dtd">
+<repositories xmlns="" version="1.0">
+  <repo quality="experimental" status="unofficial">
+    <name>gza-lxc</name>
+    <description>personnal ebuilds for lxc</description>
+    <homepage>https://github.com/gza/gentoo-lxc-overlay</homepage>
+    <owner>
+      <email>github.guillaume@zitta.fr</email>
+      <name>Guillaume ZITTA</name>
+    </owner>
+    <source type="git">git@github.com:gza/gentoo-lxc-overlay.git</source>
+    <source type="git">https://github.com/gza/gentoo-lxc-overlay.git</source>
+    <feed>https://github.com/feeds/gza/commits/gentoo-lxc-overlay/master</feed>
+  </repo>
+</repositories>
