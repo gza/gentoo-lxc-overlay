@@ -1,14 +1,14 @@
 DEFINED_PHASES=compile configure install postinst prepare setup test
-DEPEND=lua? ( >=dev-lang/lua-5.1 ) python? ( >=dev-lang/python-3 ) sys-libs/libcap seccomp? ( sys-libs/libseccomp[static-libs] ) doc? ( app-text/docbook2X ) >=sys-kernel/linux-headers-3.2 !<sys-devel/gettext-0.18.1.1-r3 || ( >=sys-devel/automake-1.13:1.13 >=sys-devel/automake-1.14:1.14 ) >=sys-devel/autoconf-2.68 sys-devel/libtool userland_GNU? ( >=sys-apps/coreutils-8.5 ) python_targets_python3_2? ( >=dev-lang/python-3.2.5-r2:3.2 ) python_targets_python3_3? ( >=dev-lang/python-3.3.2-r2:3.3 ) dev-lang/python-exec:=[python_targets_python3_2(-)?,python_targets_python3_3(-)?,-python_single_target_python3_2(-),-python_single_target_python3_3(-)]
+DEPEND=lua? ( >=dev-lang/lua-5.1 ) python? ( >=dev-lang/python-3 ) sys-libs/libcap net-libs/gnutls seccomp? ( sys-libs/libseccomp[static-libs] ) doc? ( app-text/docbook2X ) >=sys-kernel/linux-headers-3.2 !<sys-devel/gettext-0.18.1.1-r3 || ( >=sys-devel/automake-1.13:1.13 >=sys-devel/automake-1.14:1.14 ) >=sys-devel/autoconf-2.68 sys-devel/libtool userland_GNU? ( >=sys-apps/coreutils-8.5 ) python_targets_python3_2? ( >=dev-lang/python-3.2.5-r2:3.2 ) python_targets_python3_3? ( >=dev-lang/python-3.3.2-r2:3.3 ) dev-lang/python-exec:=[python_targets_python3_2(-)?,python_targets_python3_3(-)?,-python_single_target_python3_2(-),-python_single_target_python3_3(-)]
 DESCRIPTION=LinuX Containers userspace utilities
 EAPI=5
-HOMEPAGE=http://lxc.sourceforge.net/
+HOMEPAGE=http://linuxcontainers.org/
 IUSE=doc examples lua python seccomp python_targets_python3_2 python_targets_python3_3
 KEYWORDS=~amd64 ~arm ~ppc64 ~x86
 LICENSE=LGPL-3
-RDEPEND=lua? ( >=dev-lang/lua-5.1 ) python? ( >=dev-lang/python-3 ) sys-libs/libcap seccomp? ( sys-libs/libseccomp[static-libs] ) app-misc/pax-utils >=sys-apps/openrc-0.9.9.1 sys-apps/util-linux virtual/awk python_targets_python3_2? ( >=dev-lang/python-3.2.5-r2:3.2 ) python_targets_python3_3? ( >=dev-lang/python-3.3.2-r2:3.3 ) dev-lang/python-exec:=[python_targets_python3_2(-)?,python_targets_python3_3(-)?,-python_single_target_python3_2(-),-python_single_target_python3_3(-)]
+RDEPEND=lua? ( >=dev-lang/lua-5.1 ) python? ( >=dev-lang/python-3 ) sys-libs/libcap net-libs/gnutls seccomp? ( sys-libs/libseccomp[static-libs] ) app-misc/pax-utils sys-apps/openrc sys-apps/util-linux virtual/awk python_targets_python3_2? ( >=dev-lang/python-3.2.5-r2:3.2 ) python_targets_python3_3? ( >=dev-lang/python-3.3.2-r2:3.3 ) dev-lang/python-exec:=[python_targets_python3_2(-)?,python_targets_python3_3(-)?,-python_single_target_python3_2(-),-python_single_target_python3_3(-)]
 REQUIRED_USE=|| ( python_targets_python3_2 python_targets_python3_3 )
 SLOT=0
-SRC_URI=http://lxc.sourceforge.net/download/lxc/lxc-0.9.0.tar.gz
-_eclasses_=autotools	d76ee21296238133bd2df8dea7f33a05	distutils-r1	59b53892e6e67d8f2c5592e8a5ff3aac	eutils	40081e8c7e7f7c4f9db349a1d6d52925	flag-o-matic	62e05953761097ae84a70d6c7a3e2c9c	libtool	bf5062d2ffe64907c251cb7636421070	linux-info	a9cbd6bbe2b28166e403321882f3c73c	multibuild	56d4120419072116417e8de1bd1040ff	multilib	892e597faee02a5b94eb02ab512e7622	multiprocessing	c2d96fb38f2596209e98fceda58ba1ed	python-r1	3bb814ab7959a36067101a6bef683b6f	python-utils-r1	49ee0ca5e1019d8f256a23692dad2642	toolchain-funcs	51e6c948e72c43bcc8edc7544411c953	versionator	a8a3963967d6140be9a14b08bb8f047f
-_md5_=44b53d8f8c0cc3727178506dc882c4fd
+SRC_URI=https://github.com/lxc/lxc/archive/lxc-0.9.0.tar.gz
+_eclasses_=autotools	d76ee21296238133bd2df8dea7f33a05	autotools-utils	559ed17194292ec42d68145dcca2fa32	distutils-r1	59b53892e6e67d8f2c5592e8a5ff3aac	eutils	40081e8c7e7f7c4f9db349a1d6d52925	flag-o-matic	62e05953761097ae84a70d6c7a3e2c9c	libtool	bf5062d2ffe64907c251cb7636421070	linux-info	a9cbd6bbe2b28166e403321882f3c73c	multibuild	56d4120419072116417e8de1bd1040ff	multilib	892e597faee02a5b94eb02ab512e7622	multiprocessing	c2d96fb38f2596209e98fceda58ba1ed	python-r1	3bb814ab7959a36067101a6bef683b6f	python-utils-r1	49ee0ca5e1019d8f256a23692dad2642	toolchain-funcs	51e6c948e72c43bcc8edc7544411c953	versionator	a8a3963967d6140be9a14b08bb8f047f
+_md5_=630bbcdb4d8599fb1d8b99f16144eef8

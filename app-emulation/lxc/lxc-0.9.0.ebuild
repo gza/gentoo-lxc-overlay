@@ -5,14 +5,21 @@
 EAPI="5"
 PYTHON_COMPAT=( python{3_1,3_2,3_3} )
 
-MY_P="${P/_/-}"
+AUTOTOOLS_AUTORECONF=true
+AUTOTOOLS_IN_SOURCE_BUILD=1
 
-inherit autotools eutils flag-o-matic linux-info versionator distutils-r1
+inherit autotools-utils eutils flag-o-matic linux-info versionator distutils-r1
 
 DESCRIPTION="LinuX Containers userspace utilities"
-HOMEPAGE="http://lxc.sourceforge.net/"
-SRC_URI="http://lxc.sourceforge.net/download/lxc/${MY_P}.tar.gz"
-S="${WORKDIR}/${MY_P}"
+HOMEPAGE="http://linuxcontainers.org/"
+
+if [[ "${PV}" == "9999" ]]; then
+	SRC_URI="https://github.com/lxc/lxc/archive/master.tar.gz -> ${P}.tar.gz"
+	S="${WORKDIR}/lxc-master"
+else
+	SRC_URI="https://github.com/lxc/lxc/archive/${P}.tar.gz"
+fi
+
 
 KEYWORDS="~amd64 ~arm ~ppc64 ~x86"
 
@@ -24,6 +31,7 @@ RDEPEND="
 	lua? ( >=dev-lang/lua-5.1 )
 	python? ( >=dev-lang/python-3 )
 	sys-libs/libcap
+	net-libs/gnutls
 	seccomp? ( sys-libs/libseccomp[static-libs] )"
 
 DEPEND="${RDEPEND}
@@ -32,7 +40,7 @@ DEPEND="${RDEPEND}
 
 RDEPEND="${RDEPEND}
 	app-misc/pax-utils
-	>=sys-apps/openrc-0.9.9.1
+	sys-apps/openrc
 	sys-apps/util-linux
 	virtual/awk"
 
@@ -71,6 +79,7 @@ ERROR_MACVLAN="CONFIG_MACVLAN:	needed for internal (inter-container) networking"
 
 ERROR_POSIX_MQUEUE="CONFIG_POSIX_MQUEUE:	needed for lxc-execute command"
 
+#Is this true anymore ?
 ERROR_NETPRIO_CGROUP="CONFIG_NETPRIO_CGROUP:	as of kernel 3.3 and lxc 0.8.0_rc1 this causes LXCs to fail booting."
 
 ERROR_GRKERNSEC_CHROOT_MOUNT=":CONFIG_GRKERNSEC_CHROOT_MOUNT	some GRSEC features make LXC unusable see postinst notes"
@@ -78,13 +87,18 @@ ERROR_GRKERNSEC_CHROOT_DOUBLE=":CONFIG_GRKERNSEC_CHROOT_DOUBLE	some GRSEC featur
 ERROR_GRKERNSEC_CHROOT_PIVOT=":CONFIG_GRKERNSEC_CHROOT_PIVOT	some GRSEC features make LXC unusable see postinst notes"
 ERROR_GRKERNSEC_CHROOT_CHMOD=":CONFIG_GRKERNSEC_CHROOT_CHMOD	some GRSEC features make LXC unusable see postinst notes"
 ERROR_GRKERNSEC_CHROOT_CAPS=":CONFIG_GRKERNSEC_CHROOT_CAPS	some GRSEC features make LXC unusable see postinst notes"
+ERROR_GRKERNSEC_CHROOT_MKNOD=":CONFIG_GRKERNSEC_CHROOT_MKNOD	some GRSEC features make LXC unusable see postinst notes"
 
 DOCS=(AUTHORS CONTRIBUTING MAINTAINERS TODO README doc/FAQ.txt)
 
 src_prepare() {
+	#Patch if any
+	for patch_file in $(ls ${FILESDIR}/${P}-*.patch); do
+		epatch "${patch_file}"
+	done
+
 	# prepare python
-    if use python
-	then
+	if use python; then
 		#First we need one python impl to pass the configure
 		echo_epython() {
 		    echo ${EPYTHON}
@@ -99,24 +113,11 @@ src_prepare() {
 
 	sed -i 's,docbook2x-man,docbook2man.pl,' configure.ac || die
 
-	sed -i 's/AM_CONFIG_HEADER/AC_CONFIG_HEADERS/g' configure.ac || die
-	epatch ${FILESDIR}/0001-build-use-libtool-for-linking-the-library-and-link-l.patch
-	epatch ${FILESDIR}/0003-lxc-include-sched.h-to-have-a-declaration-of-clone.patch
-	eautoreconf
+	autotools-utils_src_prepare
 }
 
 src_configure() {
 	append-flags -fno-strict-aliasing
-
-	local myconf
-
-	if use lua ; then
-		myconf+=" --enable-lua"
-	fi
-
-	if use python; then
-		myconf+=" --enable-python"
-	fi
 
 	econf \
 		--localstatedir=/var \
@@ -128,21 +129,17 @@ src_configure() {
 		$(use_enable seccomp) \
 		--disable-apparmor \
 		$(use_enable examples) \
-		${myconf}
+		$(use_enable lua) \
+		$(use_enable python)
 }
 
 src_compile() {
-	#work around for python and lua to compile after libtoolization
-    ( cd "${S}/src/lxc" ; ln -sf .libs/liblxc-0.9.0.so liblxc.so )
-
 	default
 
 	if use python
 	then
 	  (
 	    cd "${S}/src/python-lxc"
-#	    ln -s ../lxc/.libs/liblxc-0.9.0.so liblxc.so
-#	    python_foreach_impl distutils-r1_python_compile build_ext -I ../ -L ./
 	    python_foreach_impl distutils-r1_python_compile build_ext -I ../ -L ../lxc
 	  )
 	fi
@@ -151,9 +148,6 @@ src_compile() {
 src_install() {
 	default
 
-#	rm -r "${D}"/usr/sbin/lxc-setcap \
-#		|| die "unable to remove lxc-setcap"
-
 	if use python
 	then
 		cd "${S}/src/python-lxc"
@@ -161,13 +155,12 @@ src_install() {
 		python_foreach_impl distutils-r1_python_install
 	fi
 
-	keepdir /etc/lxc /usr/lib/lxc/rootfs
+	keepdir /etc/lxc /usr/lib/lxc/rootfs /var/log/lxc
 
 	find "${D}" -name '*.la' -delete
 
-	# Gentoo-specific additions!
+	# Gentoo's init script
 	newinitd "${FILESDIR}/${PN}.initd.2" ${PN}
-	keepdir /var/log/lxc
 }
 
 pkg_postinst() {
@@ -178,18 +171,11 @@ pkg_postinst() {
 	elog "For further information about LXC development see"
 	elog "http://blog.flameeyes.eu/tag/lxc" # remove once proper doc is available
 	elog ""
-	ewarn "With version 0.7.4, the mountpoint syntax came back to the one used by 0.7.2"
-	ewarn "and previous versions. This means you'll have to use syntax like the following"
-	ewarn ""
-	ewarn "    lxc.rootfs = /container"
-	ewarn "    lxc.mount.entry = /usr/portage /container/usr/portage none bind 0 0"
-	ewarn ""
-	ewarn "To use the Fedora, Debian and (various) Ubuntu auto-configuration scripts, you"
-	ewarn "will need sys-apps/yum or dev-util/debootstrap."
-	ewarn ""
+	elog "To use the Fedora, Debian and (various) Ubuntu auto-configuration scripts, you"
+	elog "will need sys-apps/yum or dev-util/debootstrap."
+	elog ""
 	ewarn "Some GrSecurity settings in relation to chroot security will cause LXC not to"
 	ewarn "work, while others will actually make it much more secure. Please refer to"
 	ewarn "Diego Elio Pettenò's weblog at http://blog.flameeyes.eu/tag/lxc for further"
 	ewarn "details."
 }
-
