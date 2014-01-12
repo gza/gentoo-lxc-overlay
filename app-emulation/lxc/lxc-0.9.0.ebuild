@@ -127,7 +127,7 @@ src_configure() {
 		--localstatedir=/var \
 		--bindir=/usr/sbin \
 		--docdir=/usr/share/doc/${PF} \
-		--with-config-path=/etc/lxc	\
+		--with-config-path=/var/lib/lxc	\
 		--with-rootfs-path=/usr/lib/lxc/rootfs \
 		$(use_enable doc) \
 		$(use_enable seccomp) \
