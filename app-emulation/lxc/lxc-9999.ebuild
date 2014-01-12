@@ -25,10 +25,13 @@ KEYWORDS="~amd64 ~arm ~ppc64 ~x86"
 
 LICENSE="LGPL-3"
 SLOT="0"
-IUSE="doc examples lua python seccomp"
+IUSE="doc examples +lua +python seccomp"
 
 RDEPEND="
-	lua? ( >=dev-lang/lua-5.1 )
+	lua? ( >=dev-lang/lua-5.1 
+			dev-lua/luafilesystem 
+			dev-lua/alt-getopt
+			)
 	python? ( >=dev-lang/python-3 )
 	sys-libs/libcap
 	net-libs/gnutls
