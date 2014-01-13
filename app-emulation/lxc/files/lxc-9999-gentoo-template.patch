@@ -1,8 +1,8 @@
 diff --git a/configure.ac b/configure.ac
-index cbaa38b..ec7d835 100644
+index 8514267..d69afe7 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -644,6 +644,7 @@ AC_CONFIG_FILES([
+@@ -648,6 +648,7 @@ AC_CONFIG_FILES([
  	templates/lxc-archlinux
  	templates/lxc-alpine
  	templates/lxc-plamo
@@ -11,27 +11,29 @@ index cbaa38b..ec7d835 100644
  	src/Makefile
  	src/lxc/Makefile
 diff --git a/templates/Makefile.am b/templates/Makefile.am
-index abdca6f..168a999 100644
+index ff0a603..ac870a1 100644
 --- a/templates/Makefile.am
 +++ b/templates/Makefile.am
-@@ -15,4 +15,5 @@ templates_SCRIPTS = \
- 	lxc-archlinux \
- 	lxc-alpine \
- 	lxc-cirros \
--	lxc-plamo
-+	lxc-plamo \
-+	lxc-gentoo
+@@ -10,6 +10,7 @@ templates_SCRIPTS = \
+ 	lxc-debian \
+ 	lxc-download \
+ 	lxc-fedora \
++	lxc-gentoo \
+ 	lxc-openmandriva \
+ 	lxc-opensuse \
+ 	lxc-oracle \
 diff --git a/templates/lxc-gentoo.in b/templates/lxc-gentoo.in
 new file mode 100644
-index 0000000..fba4ad1
+index 0000000..2bc13fd
 --- /dev/null
 +++ b/templates/lxc-gentoo.in
-@@ -0,0 +1,864 @@
+@@ -0,0 +1,828 @@
 +#!/bin/bash
 +
-+###############################################################################
 +#
 +# LXC template for gentoo
++#
++# Author: Guillaume Zitta <lxc@zitta.fr>
 +#
 +# Widely inspired from lxc-gentoo script at https://github.com/globalcitizen/lxc-gentoo
 +#
@@ -40,14 +42,6 @@ index 0000000..fba4ad1
 +# - vanilla gentoo config
 +# - ready to use cache
 +#
-+# TODOLIST:
-+#       - test all options
-+#       - re test all options
-+#       - wait for gentoo #496054
-+#       - wait for response to LXC proposal http://lists.linuxcontainers.org/pipermail/lxc-devel/2013-December/006771.html
-+#          - added bash version of this feature here
-+#
-+###############################################################################
 +
 +# Ensure strict root's umask doesen't render the VM unusable
 +umask 022
@@ -492,6 +486,7 @@ index 0000000..fba4ad1
 +	#add to managed list
 +	[[ "${nic_conf}" == "dhcp" ]] && nic_managed="${nic_managed} ${nic_name}"
 +	[[ "${nic_conf}" == "null" ]] && nic_unmanaged="${nic_unmanaged} ${nic_name}"
++	[[ -z "${nic_hwaddr}" && ${nic_type} == "veth" ]] && nic_wo_hwaddr="${nic_wo_hwaddr} ${nic_name}"
 +	nic_writed=1
 +}
 +
@@ -526,7 +521,13 @@ index 0000000..fba4ad1
 +			#=> Number is ID munis number of named NIC before
 +			nic_name="eth$(( ${nic_last} - ${nic_named} ))"
 +			nic_conf="dhcp"
++			nic_type="${value}"
 +		fi
++
++                if [[ "${key}" == "lxc.network.hwaddr" ]]; then
++		        nic_hwaddr=1
++		fi
++
 +		if [[ "${key}" =~ ^lxc.network.ipv(4|6) ]]; then
 +			#tell openrc to not manage this NIC as LXC set there address
 +			nic_conf="null"
@@ -549,23 +550,38 @@ index 0000000..fba4ad1
 +{
 +	printf "container_net(): setting container network conf... \n"
 +
-+	#let suppose all containers shoud have net if we found a bridge
-+	if ! grep -q "^lxc.network.type" $path/config 2>/dev/null; then
-+		## guess first bridge name
++	#Analyse network configuration in config
++	container_conf_net "$path/config" >> "${rootfs}/etc/conf.d/net"
++
++        # found how much nic finaly have
++	nic_count=$(( ${nic_last} + 1 ))
++
++        # unless openrc manage a nic, we now have to force openrc to automatic
++	# provision of the 'net' dep. If we do not, network dependent services
++	# will fail to load
++	if [[ -z "${nic_managed}" ]]; then
++		#tell openrc that lxc already did the work
++		echo 'rc_provide="net"' >> "$CACHE/etc/rc.conf"
++	fi
++
++	#No NIC ?
++	if [[ ${nic_count} == 0 ]]; then
++		#If no Nic, no need to continue
 +		bridge=$(brctl show | awk 'NR==2 {print $1}')
 +		if [[ "${bridge}" != "" ]]; then
-+			cat <<EOF >> $path/config
-+#Autodetected nic by lxc-gentoo
++                        store_user_message "No network interface for this container
++It's a pitty, you have bridge, ${bridge}.
++If it is for Lxc, use it next time by adding this to your default.conf :
 +lxc.network.type = veth
 +lxc.network.link = ${bridge}
 +lxc.network.flags = up
-+EOF
-+		store_user_message "network was autodetected, we use veth over bridge: ${bridge}, it will need a dhcp server to work"
++lxc.network.hwaddr = fe:xx:xx:xx:xx:xx"
++                        return 0
++		else
++		        store_user_message "No network interface for this container"
++                        return 0
 +		fi
 +	fi
-+
-+	#Analyse network configuration in config
-+	container_conf_net "$path/config" >> "${rootfs}/etc/conf.d/net"
 +
 +	#For each openrc managed nic, activate
 +	for nic in ${nic_managed}
@@ -574,65 +590,14 @@ index 0000000..fba4ad1
 +		chroot "${rootfs}" rc-update add net.${nic} default
 +	done
 +
-+	# unless openrc manage a nic, we now have to force openrc to automatic
-+	# provision of the 'net' dep. If we do not, network dependent services
-+	# will fail to load
-+	if [[ -z "${nic_managed}" ]]; then
-+		#tell openrc that lxc already did the work
-+		echo 'rc_provide="net"' >> "$CACHE/etc/rc.conf"
++        #Warn about dynamic hwaddr
++	if [[ -n "${nic_wo_hwaddr}" ]]; then
++                store_user_message "Warning, these veth NIC don't have fixed hwaddr :
++${nic_wo_hwaddr}
++
++see http://lists.linuxcontainers.org/pipermail/lxc-devel/2013-December/006736.html
++and man lxc.conf"
 +	fi
-+
-+	# found how much nic finaly have
-+	nic_count=$(( ${nic_last} + 1 ))
-+	if [[ ${nic_count} == 0 ]]; then
-+		#If no Nic, no need to continue
-+		store_user_message "No network interface for this container"
-+		return 0
-+	fi
-+
-+	# Here is some tweak about static hwaddr
-+	# if there is exactly one veth or macvlan network entry, make sure
-+	# it has an associated mac address.
-+	# Read explanations : http://lists.linuxcontainers.org/pipermail/lxc-devel/2013-December/006736.html
-+	# Bash limits the ability to do this on more than 1 nic
-+	if [ "${nic_count}" -eq 1 ] && ! grep -q "^lxc.network.hwaddr" $path/config; then
-+		hwaddr="fe:$(dd if=/dev/urandom bs=8 count=1 2>/dev/null |od -t x8 | \
-+			head -1 |awk '{print $2}' | cut -c1-10 |\
-+			sed 's/\(..\)/\1:/g; s/.$//')"
-+		echo "#Fixed hwaddr" >> $path/config
-+		echo "#http://lists.linuxcontainers.org/pipermail/lxc-devel/2013-December/006736.html" >> $path/config
-+		echo "lxc.network.hwaddr = $hwaddr" >> $path/config
-+		store_user_message "a static hardware addr was fixed for your NIC"
-+	fi
-+
-+	#Wiser hwaddr management
-+	# If you put a lxc.network.hwaddr containing "x", like fe:a2:xx:xx:xx:xx
-+	# each x will be replaced with random hex number
-+	# similar feature is proposed for lxc-create
-+	# http://lists.linuxcontainers.org/pipermail/lxc-devel/2013-December/006771.html
-+	# In the meantime, here is bash version
-+
-+	#generate enough random hex for all nics
-+	randomhex=$(od -An -N $(( ${nic_count} * 6 )) -t x2 /dev/urandom | sed ':a;N;$!ba;s/\n/ /g;s/\n/ /g' | sed 's/[^0-f]//g')
-+
-+	#replace "x" in hwaddr with
-+	awk -F '[ \t]*=[ \t]*' '
-+	BEGIN { split("'${randomhex}'", randomhex, ""); r=1 }
-+	$1 != "lxc.network.hwaddr" { print $0 }
-+	$1 == "lxc.network.hwaddr" { printf("%s = ",$1)
-+		split($2, chars, "");
-+		for (i=1; i <= length(chars); i++) {
-+		if ( chars[i] == "x" ) {
-+		printf("%s", randomhex[r]);
-+		r=r+1;
-+		}
-+		else printf("%s", chars[i]);
-+		}
-+		printf("\n");
-+	}' $path/config >> $path/config.hwaddr.awk
-+
-+	diff $path/config.hwaddr.awk $path/config >/dev/null 2>&1 || store_user_message "templated hwaddr generated"
-+	[[ $? == 0 ]] && mv $path/config.hwaddr.awk $path/config
 +
 +	printf " => network conf done.\n"
 +}

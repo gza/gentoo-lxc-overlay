@@ -14,12 +14,15 @@ DESCRIPTION="LinuX Containers userspace utilities"
 HOMEPAGE="http://linuxcontainers.org/"
 
 if [[ "${PV}" == "9999" ]]; then
-	SRC_URI="https://github.com/lxc/lxc/archive/master.tar.gz -> ${P}.tar.gz"
+    inherit git-2
+    EGIT_REPO_URI="https://github.com/lxc/lxc.git"
+	SRC_URI=""
 	S="${WORKDIR}/lxc-master"
 else
 	SRC_URI="https://github.com/lxc/lxc/archive/${P}.tar.gz"
 fi
 
+[[ "${PV}" == "0.9.0" ]] && use_usleep="sys-apps/usleep"
 
 KEYWORDS="~amd64 ~arm ~ppc64 ~x86"
 
@@ -31,6 +34,7 @@ RDEPEND="
 	lua? ( >=dev-lang/lua-5.1 
 			dev-lua/luafilesystem 
 			dev-lua/alt-getopt
+			${use_usleep}
 			)
 	python? ( >=dev-lang/python-3 )
 	sys-libs/libcap
