@@ -25,3 +25,6 @@ Should work, this comment will be removed after more testing
 * multi
 * lua support (mainly for lxc-top)
 * cleaner ebuild
+* config and rootfs setuped to /var/lib/lxc
+ * IMO : better than having rootfs under /etc
+ * I'm searching for a solution to have rootfs in /var and config of container in /etc
