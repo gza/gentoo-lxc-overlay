@@ -100,7 +100,7 @@ DOCS=(AUTHORS CONTRIBUTING MAINTAINERS TODO README doc/FAQ.txt)
 
 src_prepare() {
 	#Patch if any
-	for patch_file in $(ls ${FILESDIR}/${P}-*.patch); do
+	for patch_file in $(ls ${FILESDIR}/${P}-*.patch 2>/dev/null); do
 		epatch "${patch_file}"
 	done
 

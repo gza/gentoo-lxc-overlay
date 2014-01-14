@@ -21,7 +21,7 @@ Should work, this comment will be removed after more testing
 
 # What is different from others ebuild ?
 
-* lxc-9999 has gentoo template
+* lxc-9999 has gentoo template (Now mainstream !!!)
 * multi
 * lua support (mainly for lxc-top)
 * cleaner ebuild
