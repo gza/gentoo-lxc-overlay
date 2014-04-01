@@ -22,6 +22,7 @@ then add overlay:<br>
 
 # Content
 
+* app-emulation/lxc-1.0.1
 * app-emulation/lxc-0.9.0
 * app-emulation/lxc-9999
   * with lxc-gentoo template !
@@ -30,7 +31,7 @@ then add overlay:<br>
 
 # What is different from others ebuild ?
 
-* lxc-9999 has gentoo template (Now mainstream !!!)
+* offical gentoo template introduced in 1.0
 * multi
 * lua support (mainly for lxc-top)
 * cleaner ebuild
