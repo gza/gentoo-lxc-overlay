@@ -10,6 +10,8 @@ lxc_get_configfile() {
 		echo "/etc/lxc/${CONTAINER}.conf"
 	elif [ -f "/etc/lxc/${CONTAINER}/config" ]; then
 		echo "/etc/lxc/${CONTAINER}/config"
+        elif [ -f "/var/lib/lxc/${CONTAINER}/config" ]; then
+	        echo "/var/lib/lxc/${CONTAINER}/config"
 	else
 		eerror "Unable to find a suitable configuration file."
 		eerror "If you set up the container in a non-standard"
