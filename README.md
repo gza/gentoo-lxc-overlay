@@ -22,10 +22,11 @@ then add overlay:<br>
 
 # Content
 
+* app-emulation/lxc-9999
+* app-emulation/lxc-1.0.3
+* app-emulation/lxc-1.0.2
 * app-emulation/lxc-1.0.1
 * app-emulation/lxc-0.9.0
-* app-emulation/lxc-9999
-  * with lxc-gentoo template !
 * dev-lua/alt-getopt-0.7.0
   * Needed by lua useflag
 
