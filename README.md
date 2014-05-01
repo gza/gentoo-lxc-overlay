@@ -12,6 +12,10 @@ Should work, this comment will be removed after more testing
 Add https://raw.github.com/gza/gentoo-lxc-overlay/master/overlay.xml<br>
 to /etc/layman/layman.cfg<br>
 at "overlays :"<br>
+sync overlays:<br>
+
+    layman -S
+
 then add overlay:<br>
 
     layman -a gza-lxc
