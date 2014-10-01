@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/app-emulation/lxc/lxc-0.8.0-r1.ebuild,v 1.2 2013/05/04 21:42:25 jlec Exp $
 
 EAPI="5"
-PYTHON_COMPAT=( python{3_1,3_2,3_3} )
+PYTHON_COMPAT=( python{3_1,3_2,3_3,3_4} )
 
 AUTOTOOLS_AUTORECONF=true
 AUTOTOOLS_IN_SOURCE_BUILD=1
@@ -20,6 +20,7 @@ if [[ "${PV}" == "9999" ]]; then
 	S="${WORKDIR}/lxc-master"
 else
 	SRC_URI="https://github.com/lxc/lxc/archive/${P}.tar.gz"
+	S="${WORKDIR}/lxc-${P}"
 fi
 
 [[ "${PV}" == "0.9.0" ]] && use_usleep="sys-apps/usleep"
@@ -96,7 +97,7 @@ ERROR_GRKERNSEC_CHROOT_CHMOD=":CONFIG_GRKERNSEC_CHROOT_CHMOD	some GRSEC features
 ERROR_GRKERNSEC_CHROOT_CAPS=":CONFIG_GRKERNSEC_CHROOT_CAPS	some GRSEC features make LXC unusable see postinst notes"
 ERROR_GRKERNSEC_CHROOT_MKNOD=":CONFIG_GRKERNSEC_CHROOT_MKNOD	some GRSEC features make LXC unusable see postinst notes"
 
-DOCS=(AUTHORS CONTRIBUTING MAINTAINERS TODO README doc/FAQ.txt)
+DOCS=(AUTHORS CONTRIBUTING MAINTAINERS README doc/FAQ.txt)
 
 src_prepare() {
 	#Patch if any

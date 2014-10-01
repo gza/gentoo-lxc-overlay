@@ -5,7 +5,7 @@ gentoo lxc stuff, for my personnal use, hope this could help you
 
 # Status
 
-Should work, this comment will be removed after more testing
+No problem so far, tell me if you find some
 
 # Usage
 ## Add overlay list to layman
@@ -31,19 +31,16 @@ then add overlay:<br>
 # Content
 
 * app-emulation/lxc-9999
+* app-emulation/lxc-1.0.6
+* app-emulation/lxc-1.0.5
 * app-emulation/lxc-1.0.3
-* app-emulation/lxc-1.0.2
-* app-emulation/lxc-1.0.1
-* app-emulation/lxc-0.9.0
 * dev-lua/alt-getopt-0.7.0
   * Needed by lua useflag
 
 # What is different from others ebuild ?
 
-* offical gentoo template introduced in 1.0
-* multi
-* lua support (mainly for lxc-top)
+* maintainer :)
+* lua support (mainly for lxc-top, but not heavily tested)
 * cleaner ebuild
-* config and rootfs setuped to /var/lib/lxc
- * IMO : better than having rootfs under /etc
- * I'm searching for a solution to have rootfs in /var and config of container in /etc
+* container's config and rootfs under /var/lib/lxc/container
+ * IMO : This is lxc's data, so this a realy bad idea to put it in /etc
