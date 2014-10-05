@@ -24,9 +24,9 @@ then add overlay:<br>
 
     layman -o https://raw.github.com/gza/gentoo-lxc-overlay/master/overlay.xml -f -a gza-lxc
 
-# unmask these lxc ebuilds
+# accept keyword for these lxc ebuilds (but not 9999)
 
-    echo "<app-emulation/lxc-9999::gza-lxc" > /etc/portage/package.unmask
+    echo "<app-emulation/lxc-9999::gza-lxc ~*" >> /etc/portage/package.accept_keywords
     
 # Content
 
