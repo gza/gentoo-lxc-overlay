@@ -36,6 +36,7 @@ then add overlay:<br>
 # Content
 
 * app-emulation/lxc-9999
+* app-emulation/lxc-1.0.7
 * app-emulation/lxc-1.0.6
 * app-emulation/lxc-1.0.5
 * app-emulation/lxc-1.0.3
@@ -49,3 +50,14 @@ then add overlay:<br>
 * cleaner ebuild
 * container's config and rootfs under /var/lib/lxc/container
  * IMO : This is lxc's data, so this a realy bad idea to put it in /etc
+
+# make a new version (reminder for myself :) )
+
+* cd app-emulation/lxc/
+* cp old-version new-version
+* ebuild new-version digest
+* try it
+* egencache --update --repo gza-lxc
+* update README
+* git stuff: commit push
+
