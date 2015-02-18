@@ -35,7 +35,10 @@ then add overlay:<br>
 
 # Content
 
-* app-emulation/lxc-9999
+* app-emulation/lxc-9999 <- rebased on main portage ebuild
+* app-emulation/lxc-1.1.0 <- rebased on main portage ebuild
+* app-emulation/lxc-1.0.7-r1 <- fixed lxc template
+with earlier version, gentoo template is broken
 * app-emulation/lxc-1.0.7
 * app-emulation/lxc-1.0.6
 * app-emulation/lxc-1.0.5
@@ -46,8 +49,7 @@ then add overlay:<br>
 # What is different from others ebuild ?
 
 * maintainer :)
-* lua support (mainly for lxc-top, but not heavily tested)
-* cleaner ebuild
+* gentoo template patch (cf https://lists.linuxcontainers.org/pipermail/lxc-devel/2015-February/011391.html)
 * container's config and rootfs under /var/lib/lxc/container
  * IMO : This is lxc's data, so this a realy bad idea to put it in /etc
 

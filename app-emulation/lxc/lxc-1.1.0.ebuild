@@ -111,7 +111,7 @@ src_prepare() {
 		epatch "${WORKDIR}"/patches/*
 	fi
 
-    epatch "${FILESDIR}"/fix-gentoo-stage3-detection.patch
+	epatch "${FILESDIR}"/fix-gentoo-stage3-detection.patch
 	epatch "${FILESDIR}"/${PN}-1.0.6-bash-completion.patch
 
 	eautoreconf
